@@ -9,6 +9,10 @@ package utils;
 import models.Project;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
+import org.commonmark.ext.autolink.AutolinkExtension;
+import org.commonmark.ext.gfm.strikethrough.StrikethroughExtension;
+import org.commonmark.ext.gfm.tables.TablesExtension;
+import org.commonmark.ext.heading.anchor.HeadingAnchorExtension;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -26,12 +30,25 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Arrays;
+import java.util.List;
+
+import org.commonmark.Extension;
+import org.commonmark.parser.Parser;
+import org.commonmark.renderer.html.HtmlRenderer;
 
 public class Markdown {
 
     private static final String XSS_JS_FILE = "public/javascripts/lib/xss.js";
-    private static final String MARKED_JS_FILE = "public/javascripts/lib/marked.js";
-    private static final String HIGHLIGHT_JS_FILE = "public/javascripts/lib/highlight/highlight.pack.js";
+    private static final String COMMONMARK_JS_FILE = "public/javascripts/lib/commonmark.js";
+
+    private static List<Extension> extensions = Arrays.asList(
+            HeadingAnchorExtension.create(),
+            AutolinkExtension.create(),
+            StrikethroughExtension.create(),
+            TablesExtension.create()
+    );
+
     private static ScriptEngine engine = buildEngine();
     private static PolicyFactory sanitizerPolicy = Sanitizers.FORMATTING
             .and(Sanitizers.IMAGES)
@@ -57,7 +74,7 @@ public class Markdown {
             reader = new InputStreamReader(is, Config.getCharset());
             _engine.eval(reader);
 
-            is = Thread.currentThread().getContextClassLoader().getResourceAsStream(MARKED_JS_FILE);
+            is = Thread.currentThread().getContextClassLoader().getResourceAsStream(COMMONMARK_JS_FILE);
             reader = new InputStreamReader(is, Config.getCharset());
             _engine.eval(reader);
 
@@ -139,7 +156,10 @@ public class Markdown {
                     + "    sanitize: false, "
                     + "    smartLists: true "
                     + "}) ");
-            String rendered = renderByMarked(source, options);
+//            String rendered = renderByMarked(source, options);
+            String rendered = commonmark(source);  // "<p>This is <em>Sparta</em></p>\n"
+            System.out.println(rendered);
+
             rendered = removeJavascriptInHref(rendered);
             rendered = checkReferrer(rendered);
             String sanitized = sanitize(rendered);
@@ -247,4 +267,13 @@ public class Markdown {
 
     }
 
+    protected static String commonmark(String source) {
+        Parser parser = Parser.builder()
+                .extensions(extensions)
+                .build();
+        HtmlRenderer renderer = HtmlRenderer.builder()
+                .extensions(extensions)
+                .build();
+        return renderer.render(parser.parse(source));
+    }
 }

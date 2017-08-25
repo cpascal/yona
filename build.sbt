@@ -56,7 +56,12 @@ libraryDependencies ++= Seq(
   "com.google.guava" % "guava" % "19.0",
   "com.googlecode.htmlcompressor" % "htmlcompressor" % "1.4",
   "org.springframework" % "spring-jdbc" % "4.1.5.RELEASE",
-  "org.mozilla" % "rhino" % "1.7.7.1"
+  "org.mozilla" % "rhino" % "1.7.7.1",
+  "com.atlassian.commonmark" % "commonmark" % "0.9.0",
+  "com.atlassian.commonmark" % "commonmark-ext-gfm-tables" % "0.9.0",
+  "com.atlassian.commonmark" % "commonmark-ext-heading-anchor" % "0.9.0",
+  "com.atlassian.commonmark" % "commonmark-ext-autolink" % "0.9.0",
+  "com.atlassian.commonmark" % "commonmark-ext-gfm-strikethrough" % "0.9.0"
 )
 
 val projectSettings = Seq(
